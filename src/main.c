@@ -1,6 +1,6 @@
-/* File generated automatically by the QuickJS compiler. */
-
+#include <stdio.h>
 #include "quickjs/quickjs-libc.h"
+#include "uv.h"
 
 const uint32_t qjsc_hello_size = 78;
 
@@ -16,6 +16,10 @@ const uint8_t qjsc_hello[78] = {
  0x04, 0xf3, 0x00, 0x00, 0x00, 0x24, 0x01, 0x00,
  0xd1, 0x28, 0xe8, 0x03, 0x01, 0x00,
 };
+
+static void onTimerTick(uv_timer_t *handle) {
+  printf("timer tick\n");
+}
 
 int main(int argc, char **argv)
 {
@@ -40,5 +44,12 @@ int main(int argc, char **argv)
   js_std_loop(ctx);
   JS_FreeContext(ctx);
   JS_FreeRuntime(rt);
+
+  uv_loop_t *loop = uv_default_loop();
+  uv_timer_t timerHandle;
+  uv_timer_init(loop, &timerHandle);
+  uv_timer_start(&timerHandle, onTimerTick, 0, 1000);
+  uv_run(loop, UV_RUN_DEFAULT);
+
   return 0;
 }
