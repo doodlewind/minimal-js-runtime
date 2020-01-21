@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.10)
 project(main)
-add_executable(main src/main.c)
+add_executable(main
+        src/main.c
+        src/cutils.c)
 
 # libuv
 include_directories(/usr/local/include)
