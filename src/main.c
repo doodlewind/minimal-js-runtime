@@ -41,7 +41,7 @@ int main(int argc, char **argv)
   JS_AddIntrinsicBigInt(ctx);
   js_std_add_helpers(ctx, argc, argv);
   js_std_eval_binary(ctx, qjsc_hello, qjsc_hello_size, 0);
-  js_std_loop(ctx);
+  // js_rt_loop(ctx);
   JS_FreeContext(ctx);
   JS_FreeRuntime(rt);
 

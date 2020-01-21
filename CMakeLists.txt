@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 project(main)
 add_executable(main
         src/main.c
+        src/runtime.c
         src/cutils.c)
 
 # libuv
