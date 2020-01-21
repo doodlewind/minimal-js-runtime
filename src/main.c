@@ -54,6 +54,11 @@ int main(int argc, char **argv)
   JS_AddIntrinsicBigInt(ctx);
   js_std_add_helpers(ctx, argc, argv);
 
+  {
+    extern JSModuleDef *js_init_module_fib(JSContext *ctx, const char *name);
+    js_init_module_fib(ctx, "fib.so");
+  }
+
   uint8_t *buf;
   size_t buf_len;
   const char *filename = "../src/test.js";

@@ -3,6 +3,7 @@ project(main)
 add_executable(main
         src/main.c
         src/runtime.c
+        src/fib.c
         src/cutils.c)
 
 # libuv
