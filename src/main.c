@@ -1,9 +1,10 @@
 #include <stdio.h>
 #include "quickjs/quickjs-libc.h"
+#include "runtime.h"
 #include "uv.h"
 
 static void onTimerTick(uv_timer_t *handle) {
-  printf("timer tick\n");
+  printf("libuv timer tick\n");
 }
 
 static int eval_buf(JSContext *ctx, const void *buf, int buf_len,
@@ -57,6 +58,9 @@ int main(int argc, char **argv)
   {
     extern JSModuleDef *js_init_module_fib(JSContext *ctx, const char *name);
     js_init_module_fib(ctx, "fib.so");
+
+    extern JSModuleDef *js_init_module_my_os(JSContext *ctx, const char *name);
+    js_init_module_my_os(ctx, "os");
   }
 
   uint8_t *buf;
@@ -64,7 +68,7 @@ int main(int argc, char **argv)
   const char *filename = "../src/test.js";
   buf = js_load_file(ctx, &buf_len, filename);
   eval_buf(ctx, buf, buf_len, filename, JS_EVAL_TYPE_MODULE);
-  // js_rt_loop(ctx);
+  js_rt_loop(ctx);
 
   JS_FreeContext(ctx);
   JS_FreeRuntime(rt);
