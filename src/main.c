@@ -2,23 +2,36 @@
 #include "quickjs/quickjs-libc.h"
 #include "uv.h"
 
-const uint32_t qjsc_hello_size = 78;
-
-const uint8_t qjsc_hello[78] = {
- 0x02, 0x04, 0x0e, 0x63, 0x6f, 0x6e, 0x73, 0x6f,
- 0x6c, 0x65, 0x06, 0x6c, 0x6f, 0x67, 0x16, 0x48,
- 0x65, 0x6c, 0x6c, 0x6f, 0x20, 0x57, 0x6f, 0x72,
- 0x6c, 0x64, 0x10, 0x68, 0x65, 0x6c, 0x6c, 0x6f,
- 0x2e, 0x6a, 0x73, 0x0e, 0x00, 0x06, 0x00, 0x9e,
- 0x01, 0x00, 0x01, 0x00, 0x03, 0x00, 0x00, 0x14,
- 0x01, 0xa0, 0x01, 0x00, 0x00, 0x00, 0x39, 0xf1,
- 0x00, 0x00, 0x00, 0x43, 0xf2, 0x00, 0x00, 0x00,
- 0x04, 0xf3, 0x00, 0x00, 0x00, 0x24, 0x01, 0x00,
- 0xd1, 0x28, 0xe8, 0x03, 0x01, 0x00,
-};
-
 static void onTimerTick(uv_timer_t *handle) {
   printf("timer tick\n");
+}
+
+static int eval_buf(JSContext *ctx, const void *buf, int buf_len,
+                    const char *filename, int eval_flags)
+{
+    JSValue val;
+    int ret;
+
+    if ((eval_flags & JS_EVAL_TYPE_MASK) == JS_EVAL_TYPE_MODULE) {
+        /* for the modules, we compile then run to be able to set
+           import.meta */
+        val = JS_Eval(ctx, buf, buf_len, filename,
+                      eval_flags | JS_EVAL_FLAG_COMPILE_ONLY);
+        if (!JS_IsException(val)) {
+            js_module_set_import_meta(ctx, val, TRUE, TRUE);
+            val = JS_EvalFunction(ctx, val);
+        }
+    } else {
+        val = JS_Eval(ctx, buf, buf_len, filename, eval_flags);
+    }
+    if (JS_IsException(val)) {
+        js_std_dump_error(ctx);
+        ret = -1;
+    } else {
+        ret = 0;
+    }
+    JS_FreeValue(ctx, val);
+    return ret;
 }
 
 int main(int argc, char **argv)
@@ -40,8 +53,14 @@ int main(int argc, char **argv)
   JS_AddIntrinsicPromise(ctx);
   JS_AddIntrinsicBigInt(ctx);
   js_std_add_helpers(ctx, argc, argv);
-  js_std_eval_binary(ctx, qjsc_hello, qjsc_hello_size, 0);
+
+  uint8_t *buf;
+  size_t buf_len;
+  const char *filename = "../src/test.js";
+  buf = js_load_file(ctx, &buf_len, filename);
+  eval_buf(ctx, buf, buf_len, filename, JS_EVAL_TYPE_MODULE);
   // js_rt_loop(ctx);
+
   JS_FreeContext(ctx);
   JS_FreeRuntime(rt);
 
