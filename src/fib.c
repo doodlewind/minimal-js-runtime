@@ -32,13 +32,7 @@ static int js_fib_init(JSContext *ctx, JSModuleDef *m)
                                   countof(js_fib_funcs));
 }
 
-#ifdef JS_SHARED_LIBRARY
-#define JS_INIT_MODULE js_init_module
-#else
-#define JS_INIT_MODULE js_init_module_fib
-#endif
-
-JSModuleDef *JS_INIT_MODULE(JSContext *ctx, const char *module_name)
+JSModuleDef *js_init_module_fib(JSContext *ctx, const char *module_name)
 {
     JSModuleDef *m;
     m = JS_NewCModule(ctx, module_name, js_fib_init);

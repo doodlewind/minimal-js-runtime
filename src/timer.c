@@ -5,8 +5,7 @@
 #include "quickjs/quickjs.h"
 #include "uv.h"
 
-#include "cutils.h"
-#include "list.h"
+#define countof(x) (sizeof(x) / sizeof((x)[0]))
 
 typedef struct {
     JSContext *ctx;
