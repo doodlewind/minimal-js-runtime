@@ -1,15 +1,11 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include "quickjs/quickjs-libc.h"
 #include "runtime.h"
 #include "uv.h"
 
-static void onTimerTick(uv_timer_t *handle) {
-  printf("libuv timer tick\n");
-}
-
 static int eval_buf(JSContext *ctx, const void *buf, int buf_len,
-                    const char *filename, int eval_flags)
-{
+                    const char *filename, int eval_flags) {
     JSValue val;
     int ret;
 
@@ -35,8 +31,7 @@ static int eval_buf(JSContext *ctx, const void *buf, int buf_len,
     return ret;
 }
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
   JSRuntime *rt;
   JSContext *ctx;
   rt = JS_NewRuntime();
@@ -55,12 +50,16 @@ int main(int argc, char **argv)
   JS_AddIntrinsicBigInt(ctx);
   js_std_add_helpers(ctx, argc, argv);
 
+  uv_loop_t *loop = calloc(1, sizeof(*loop));
+  uv_loop_init(loop);
+  JS_SetContextOpaque(ctx, loop);
+
   {
     extern JSModuleDef *js_init_module_fib(JSContext *ctx, const char *name);
     js_init_module_fib(ctx, "fib.so");
 
-    extern JSModuleDef *js_init_module_my_os(JSContext *ctx, const char *name);
-    js_init_module_my_os(ctx, "os");
+    extern JSModuleDef *js_init_module_uv(JSContext *ctx, const char *name);
+    js_init_module_uv(ctx, "uv");
   }
 
   uint8_t *buf;
@@ -68,16 +67,8 @@ int main(int argc, char **argv)
   const char *filename = "../src/test.js";
   buf = js_load_file(ctx, &buf_len, filename);
   eval_buf(ctx, buf, buf_len, filename, JS_EVAL_TYPE_MODULE);
-  js_rt_loop(ctx);
-
+  uv_run(loop, UV_RUN_DEFAULT);
   JS_FreeContext(ctx);
   JS_FreeRuntime(rt);
-
-  uv_loop_t *loop = uv_default_loop();
-  uv_timer_t timerHandle;
-  uv_timer_init(loop, &timerHandle);
-  uv_timer_start(&timerHandle, onTimerTick, 0, 1000);
-  uv_run(loop, UV_RUN_DEFAULT);
-
   return 0;
 }
