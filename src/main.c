@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "quickjs/quickjs-libc.h"
-#include "runtime.h"
 #include "uv.h"
 
 static int eval_buf(JSContext *ctx, const void *buf, int buf_len,
