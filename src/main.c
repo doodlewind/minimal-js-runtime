@@ -30,6 +30,32 @@ static int eval_buf(JSContext *ctx, const void *buf, int buf_len,
     return ret;
 }
 
+typedef struct qjs_engine {
+    JSContext *ctx;
+    JSRuntime *rt;
+} qjs_engine;
+
+
+static void execute_jobs(JSRuntime *rt, JSContext *ctx) {
+    int err;
+
+    for (;;) {
+        err = JS_ExecutePendingJob(rt, &ctx);
+        if (err <= 0) {
+            if (err < 0)
+                js_std_dump_error(ctx);
+            break;
+        }
+    }
+}
+
+static void check_callback(uv_check_t *handle) {
+    qjs_engine *engine = handle->data;
+    JSRuntime *rt = engine->rt;
+    JSContext *ctx = engine->ctx;
+    execute_jobs(rt, ctx);
+}
+
 int main(int argc, char **argv) {
   JSRuntime *rt;
   JSContext *ctx;
@@ -53,6 +79,14 @@ int main(int argc, char **argv) {
   uv_loop_init(loop);
   JS_SetContextOpaque(ctx, loop);
 
+  uv_check_t *check = calloc(1, sizeof(*check));
+
+  qjs_engine *engine = calloc(1, sizeof(*engine));
+  engine->ctx = ctx;
+  engine->rt = rt;
+  uv_check_init(loop, check);
+  check->data = engine;
+
   {
     extern JSModuleDef *js_init_module_fib(JSContext *ctx, const char *name);
     js_init_module_fib(ctx, "fib.so");
@@ -65,7 +99,13 @@ int main(int argc, char **argv) {
   size_t buf_len;
   const char *filename = "../src/test.js";
   buf = js_load_file(ctx, &buf_len, filename);
+
+  uv_check_start(check, check_callback);
+  uv_unref((uv_handle_t *) check);
+
   eval_buf(ctx, buf, buf_len, filename, JS_EVAL_TYPE_MODULE);
+  execute_jobs(rt, ctx);
+
   uv_run(loop, UV_RUN_DEFAULT);
   JS_FreeContext(ctx);
   JS_FreeRuntime(rt);
