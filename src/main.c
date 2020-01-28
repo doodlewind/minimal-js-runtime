@@ -36,24 +36,21 @@ typedef struct qjs_engine {
 } qjs_engine;
 
 
-static void execute_jobs(JSRuntime *rt, JSContext *ctx) {
+static void check_callback(uv_check_t *handle) {
+    qjs_engine *engine = handle->data;
+    JSContext *ctx = engine->ctx;
+
+    JSContext *ctx1;
     int err;
 
     for (;;) {
-        err = JS_ExecutePendingJob(rt, &ctx);
+        err = JS_ExecutePendingJob(JS_GetRuntime(ctx), &ctx1);
         if (err <= 0) {
             if (err < 0)
-                js_std_dump_error(ctx);
+                js_std_dump_error(ctx1);
             break;
         }
     }
-}
-
-static void check_callback(uv_check_t *handle) {
-    qjs_engine *engine = handle->data;
-    JSRuntime *rt = engine->rt;
-    JSContext *ctx = engine->ctx;
-    execute_jobs(rt, ctx);
 }
 
 int main(int argc, char **argv) {
@@ -104,7 +101,6 @@ int main(int argc, char **argv) {
   uv_unref((uv_handle_t *) check);
 
   eval_buf(ctx, buf, buf_len, filename, JS_EVAL_TYPE_MODULE);
-  execute_jobs(rt, ctx);
 
   uv_run(loop, UV_RUN_DEFAULT);
   JS_FreeContext(ctx);

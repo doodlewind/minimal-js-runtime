@@ -1,10 +1,9 @@
-import { fib } from 'fib.so'
 import { setTimeout } from 'uv'
 
-console.log(`fib(10) = ${fib(10)}`)
+setTimeout(() => console.log('B'), 0)
+Promise.resolve().then(() => console.log('A'))
 
-console.log('Hello')
-
-setTimeout(() => console.log('!'), 0)
-
-Promise.resolve().then(() => console.log('World'))
+setTimeout(() => {
+  setTimeout(() => console.log('D'), 0)
+  Promise.resolve().then(() => console.log('C'))
+}, 1000)

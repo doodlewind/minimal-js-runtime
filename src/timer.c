@@ -51,6 +51,20 @@ static void callTimer(UVTimer *th) {
 
 static void timerCallback(uv_timer_t *handle) {
     UVTimer *th = handle->data;
+    JSContext *ctx = th->ctx;
+
+    JSContext *ctx1;
+    int err;
+
+    for (;;) {
+        err = JS_ExecutePendingJob(JS_GetRuntime(ctx), &ctx1);
+        if (err <= 0) {
+            if (err < 0)
+                js_std_dump_error(ctx1);
+            break;
+        }
+    }
+
     callTimer(th);
     if (!th->interval)
         clearTimer(th);
