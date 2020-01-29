@@ -1,9 +1,5 @@
-#include <time.h>
-#include <sys/time.h>
-
-#include "quickjs/quickjs-libc.h"
-#include "quickjs/quickjs.h"
-#include "uv.h"
+#include <quickjs/quickjs-libc.h>
+#include <uv.h>
 
 #define countof(x) (sizeof(x) / sizeof((x)[0]))
 

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
-project(main)
-add_executable(main
+project(runtime)
+add_executable(runtime
         src/main.c
         src/timer.c
         src/fib.c)
@@ -18,6 +18,6 @@ set_target_properties(quickjs
         PROPERTIES IMPORTED_LOCATION
         "/usr/local/lib/quickjs/libquickjs.a")
 
-target_link_libraries(main
+target_link_libraries(runtime
         libuv
         quickjs)
