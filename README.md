@@ -2,11 +2,16 @@
 A toy JavaScript runtime based on QuickJS and libuv.
 
 ## Introduction
-This project demostrates how to build a simplest JavaScript runtime with QuickJS and libuv. Takeaway points include:
+This project demonstrates how to build a simplest JavaScript runtime with QuickJS and libuv. Takeaway points include:
 
 * Native `fib` function implementation.
 * `setTimeout` implementation.
 * Support for running microtasks and macrotasks.
+
+See my Chinese blog post for technical details:
+
+* [From JavaScript Engine to JavaScript Runtime - 1](https://ewind.us/2020/js-engine-to-js-runtime-1/)
+* [From JavaScript Engine to JavaScript Runtime - 2](https://ewind.us/2020/js-engine-to-js-runtime-2/)
 
 ## Getting Started
 Please make sure [CMake](https://cmake.org/), [QuickJS](https://bellard.org/quickjs/) and [libuv](https://libuv.org/) are globally installed.
