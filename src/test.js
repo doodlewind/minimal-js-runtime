@@ -1,5 +1,5 @@
 import { fib } from 'fib.so'
-import { setTimeout } from 'uv'
+import { setTimeout } from 'uv.so'
 
 console.log(`fib(10) = ${fib(10)}`)
 setTimeout(() => console.log('B'), 0)

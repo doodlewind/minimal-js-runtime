@@ -88,7 +88,7 @@ int main(int argc, char **argv) {
         js_init_module_fib(ctx, "fib.so");
 
         extern JSModuleDef *js_init_module_uv(JSContext *ctx, const char *name);
-        js_init_module_uv(ctx, "uv");
+        js_init_module_uv(ctx, "uv.so");
     }
 
     uint8_t *buf;
